@@ -1,9 +1,9 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import store from "./store";
-if (import.meta.env.MODE === 'development') {
+// if (import.meta.env.MODE === 'development') {
 	import('./api/mockjs')
-}
+// }
 import router from "./router";
 
 // 导入权限控制模块
