@@ -96,105 +96,74 @@
         <div class="d-formview">
           <el-form   :inline="true" >
             <el-form-item label="活动模版">
-              <el-select  @change="changeTemp"  v-model="activeObj.actId" value-key="id"  clearable filterable placeholder="选择模版样式">
+              <el-select   v-model="tempObj" value-key="id"  clearable filterable placeholder="选择模版样式">
                 <el-option
                     v-for="(item,index) in tempAry"
                     :key="index"
-                    :label="item.name"
-                    :value="item.id">
+                    :label="item.tempName"
+                    :value="item">
                 </el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="活动名称">
-              <el-input type="text" v-model="tempObj.tempName" placeholder="输入活动名称" maxlength="10" />
+              <el-input type="text" v-model="activeObj.name" placeholder="输入活动名称" maxlength="10" />
             </el-form-item>
-            <el-form-item label="执行营业部">
-              <el-select @change="changeProv"  v-model="tempObj.provId" value-key="id"  clearable filterable placeholder="选择省区">
+            <el-form-item label="活动描述">
+              <el-input type="textarea" v-model="activeObj.des"  rows="3" placeholder="请输入活动描述">
+              </el-input>
+            </el-form-item>
+            <el-form-item label="规则说明">
+              <el-input type="textarea" v-model="activeObj.ruleText" rows="3" placeholder="请输入活动规则说明">
+              </el-input>
+            </el-form-item>
+            <el-form-item label="活动时间">
+              <el-date-picker @change="timeChange"
+                  v-model="activeObj.time"
+                  type="daterange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期">
+              </el-date-picker>
+            </el-form-item>
+            <el-form-item label="执行站点">
+              <el-select @change="changeSites" multiple  v-model="activeSites" value-key="id"  clearable filterable placeholder="选择省区">
                 <el-option
-                    v-for="(item,index) in gAry"
+                    v-for="(item,index) in siteAry"
                     :key="index"
                     :label="item.name"
-                    :value="item.id">
-                </el-option>∂
+                    :value="item">
+                </el-option>
               </el-select>
             </el-form-item>
-
-            <div v-if="tempObj.actId==1">
-              <el-form-item label="达成条件">
-                <div
-                    v-for="(item, index) in conditions"
-                    :key="index"
-                    style="display: flex; align-items: center;margin-bottom: 20px"
-                >
-                  <el-select
-                      v-model="item.type"
-                      placeholder="请选择达成条件"
-                      clearable
-                  >
-                    <el-option
-                        v-for="opt in sucOptions"
-                        :key="opt.value"
-                        :label="opt.label"
-                        :value="opt.value"
-                        :disabled="isOptionDisabled(opt.value, index)"
-                    />
-                  </el-select>
-
-                  <!-- 删除按钮 -->
-                  <el-button
-                      v-if="conditions.length > 1"
-                      type="danger"
-                      circle
-                      size="small"
-                      icon="Delete"
-                      @click="removeCondition(index)"
-                      style="margin:0 0px 0 8px;"
-                  />
-                </div>
-
-                <!-- 添加按钮 -->
-                <el-button type="primary" plain icon="Plus" size="small" @click="addCondition" style=";margin:0 0 20px 10px">
-                </el-button>
-              </el-form-item>
-            </div>
-            <div v-else-if="tempObj.actId==2">
-              <el-form-item label="参与条件">
-                <div
-                    v-for="(item, index) in joinconditions"
-                    :key="index"
-                    style="display: flex; align-items: center;margin-bottom: 20px"
-                >
-                  <el-select
-                      v-model="item.type"
-                      placeholder="请选择参与条件"
-                      clearable
-                  >
-                    <el-option
-                        v-for="opt in joinOptions"
-                        :key="opt.value"
-                        :label="opt.label"
-                        :value="opt.value"
-                        :disabled="isJoinOptionDisabled(opt.value, index)"
-                    />
-                  </el-select>
-
-                  <!-- 删除按钮 -->
-                  <el-button
-                      v-if="joinconditions.length > 1"
-                      type="danger"
-                      circle
-                      size="small"
-                      icon="Delete"
-                      @click="removeJoinCondition(index)"
-                      style="margin:0 0px 0 8px;"
-                  />
-                </div>
-
-                <!-- 添加按钮 -->
-                <el-button type="primary" plain icon="Plus" size="small" @click="addJoinCondition" style=";margin:0 0 20px 10px">
-                </el-button>
-              </el-form-item>
-            </div>
+            <!-- 营业部配置 折叠面板 -->
+            <el-collapse v-model="activePanels"  class="sitepnl">
+              <el-collapse-item
+                  v-for="(item,index) in activeSites"
+                  :key="item.name"
+                  :name="item.id"
+              >
+                <template #title>
+                  <h3>{{ item.name }}</h3>
+                  <el-switch v-if="index==0" style="font-size: 12px;color: #666;margin-left: 100px"
+                      v-model="useAll"
+                      active-text="应用到其它营业部"
+                      inactive-text="">
+                  </el-switch>
+                </template>
+                <el-form :model="ruleForm" label-width="130px" class="ruleform">
+                  <div v-for="section in tempObj.rules" :key="section.id" class="config-section">
+                    <h4>{{ section.title }}</h4>
+                    <el-row :gutter="20">
+                      <el-col :span="12" v-for="(rule, ruleIndex) in section.rules" :key="ruleIndex" class="form-row">
+                        <el-form-item :label="rule.label">
+                          <el-input v-model="ruleForm[`${section.id}-${rule.value}`]"></el-input>
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
+                  </div>
+                </el-form>
+              </el-collapse-item>
+            </el-collapse>
           </el-form>
         </div>
         <div class="d-preview">
@@ -202,9 +171,9 @@
 
             <div class="header" :class="currentTheme">
               <div class="activity-type">{{ activityData.type }}</div>
-              <h1 class="activity-title">{{ activityData.title }}</h1>
+              <h1 class="activity-title">{{ activeObj.name }}</h1>
               <div class="activity-time">
-                <span class="time-tag tag"><i class="far fa-clock"></i> {{ activityData.time }}</span>
+                <span class="time-tag tag"><i class="far fa-clock"></i> {{ activeObj.startTime+'至'+activeObj.endTime }}</span>
               </div>
               <div class="reward-badge" :class="currentTheme">
                 <i class="fas fa-gift"></i> {{ activityData.reward }}
@@ -340,7 +309,7 @@
   flex: 1;
 }
 .d-preview{
-  flex: 1;
+  flex: 0.8;
   background-color: #f5f7fa;
   color: #333;
   line-height: 1.6;
@@ -350,12 +319,19 @@
   overflow: auto;
 }
 :deep(.el-input) {
-  width: 200px;
+  width: 350px;
 }
 :deep(.el-textarea) {
-  width: 200px;
+  width: 350px;
 }
-
+.ruleform :deep(.el-input) {
+  width: 100px;
+}
+.sitepnl{
+  height: 340px;
+  width: 90%;
+  overflow: auto;
+}
 //预览样式
 
 
@@ -732,6 +708,7 @@ import {useRoute,useRouter} from "vue-router";
 import { ElMessageBox, ElMessage } from "element-plus";
 import Mock from "mockjs";
 import {formtTime} from "@/utils/index.js";
+import * as util from "node:util";
 
 export default defineComponent({
   name: 'temp',
@@ -747,10 +724,16 @@ export default defineComponent({
       perPageSize: 20,
     });
     const pdata=reactive({
-      activeObj:{},
-      tempObj:{tempName:'',provId:'',actId:null,tempcsId:'recruit',provName:'',actName:'',time:''},
+      activeObj:{name:'',startTime:'',endTime:'',des:'',ruleText:''},
+      tempObj:{},
+      tempAry:[],
+      ruleAry:[],
+      ruleForm:{},
+      activeSites:[],
+      siteAry:[],
       tableData:[],
       total:0,
+      useAll:false,
       loading: false,
       showAddActive:false,
       gAry:[{id:1,name:'河南大区'},{id:2,name:'广东大区'},{id:3,name:'河北大区'}],
@@ -773,7 +756,23 @@ export default defineComponent({
 
     onMounted(() => {
       getListData();
+      getTempAry();
+      getSiteAry();
     })
+    const getSiteAry = () => {
+      pdata.siteAry=[
+        {id:'1',name:'东风街站点'},{id:'2',name:'西湖路站点'},
+        {id:'3',name:'陶然亭站点'},{id:'4',name:'东平路站点'},
+        {id:'5',name:'西直门站点'},{id:'6',name:'鸡鸣寺站点'},
+        {id:'7',name:'安河桥站点'},{id:'8',name:'武当路站点'}
+      ]
+    }
+    const getTempAry = () => {
+      let tempary=localStorage.getItem('tempObj');
+      if(tempary){
+        pdata.tempAry=JSON.parse(tempary);
+      }
+    }
     const addCondition = () => {
       if (pdata.conditions.length >= pdata.sucOptions.length) {
         ElMessage.warning("所有达成条件都已添加，不能再添加了")
@@ -865,7 +864,7 @@ export default defineComponent({
         searchForm.perPageSize=pageObj.limit;
       }
       if(searchForm.date.length>0){
-        searchForm.startTime=searchForm.date[0];
+        searchForm.startTime= searchForm.date[0];
         searchForm.endTime=searchForm.date[1];
       }
       const{code,data,msg}=await getTempList(searchForm);
@@ -914,6 +913,7 @@ export default defineComponent({
       const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
       pdata.tempObj.id=randomNumber;
       pdata.tempObj.time=formtTime(new Date());
+      return ;
       ary.push(pdata.tempObj)
       localStorage.setItem('tempObj',JSON.stringify(ary));
       pdata.showAddActive=false;
@@ -981,21 +981,27 @@ export default defineComponent({
     function changeTheme(theme) {
       currentTheme.value = pdata.tempcsId;
     }
-    function changeProv(val) {
-      const item = pdata.gAry.find(v => v.id === val)
-      pdata.tempObj.provName = item?.name || "";
+    function changeSites(val) {
+      let obj = val;
+      let a= pdata.activeSites;
+      //每次选择营业部加入到数组
+
     }
     function changeActType(val) {
       const item = pdata.atyps.find(v => v.id === val)
       pdata.tempObj.actName =  item.name || "";
     }
+    function timeChange(val) {
+      pdata.activeObj.startTime =formtTime(val[0]);
+      pdata.activeObj.endTime = formtTime(val[1]);
+    }
     return{addSpCondition,removeSpCondition,isSpOptionDisabled,
       addBaseCondition,removeBaseCondition,isBaseOptionDisabled,
       isOptionDisabled,addCondition,removeCondition,activityData,
       changeActType,changeTheme,saveTemp,editTemp,delTemp,
-      searchEvent,getListData,addActive,currentTheme,changeProv,
+      searchEvent,getListData,addActive,currentTheme,changeSites,
       addJoinCondition,removeJoinCondition,isJoinOptionDisabled,
-      addZhSucCondition,removeZhSucCondition,isZhSucOptionDisabled,
+      addZhSucCondition,removeZhSucCondition,isZhSucOptionDisabled,timeChange,
       ...toRefs(pdata),...toRefs(searchForm)};
   }
 })

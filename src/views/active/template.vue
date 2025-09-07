@@ -103,7 +103,7 @@
                     :key="index"
                     :label="item.name"
                     :value="item.id">
-                </el-option>∂
+                </el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="活动类型">
@@ -238,11 +238,14 @@
                 </el-button>
               </el-form-item>
               <el-form-item label="额外奖励">
-              <el-select  v-model="type"
-                          placeholder="请选择额外达成奖励"
-                          clearable>
-                <el-option label="邀请1人奖励" value="1" />
-              </el-select>
+                <el-select @change="spawardChange"  v-model="spAwardId" value-key="id"  clearable filterable placeholder="请选择额外达成奖励">
+                  <el-option
+                      v-for="(item,index) in spAwardOptions"
+                      :key="index"
+                      :label="item.label"
+                      :value="item.id">
+                  </el-option>
+                </el-select>
             </el-form-item>
             </div>
             <div v-else-if="tempObj.actId==2">
@@ -481,10 +484,10 @@
   overflow: auto;
 }
 :deep(.el-input) {
-  width: 200px;
+  width: 310px;
 }
 :deep(.el-textarea) {
-  width: 200px;
+  width: 310px;
 }
 
 //预览样式
@@ -878,7 +881,7 @@ export default defineComponent({
       perPageSize: 20,
     });
     const pdata=reactive({
-      tempObj:{tempName:'',provId:'',actId:null,tempcsId:'recruit',provName:'',actName:'',time:''},
+      tempObj:{rules:[],tempName:'',provId:'',actId:null,tempcsId:'recruit',provName:'',actName:'',time:''},
       tableData:[],
       total:0,
       loading: false,
@@ -886,7 +889,7 @@ export default defineComponent({
       gAry:[{id:1,name:'河南大区'},{id:2,name:'广东大区'},{id:3,name:'河北大区'}],
       atyps:[{id:1,name:'拉新人'},{id:2,name:'骑士召回'},{id:3,name:'早晚冲单'}],
       tempcsAry:[{id:'recruit',name:'样式1'},{id:'incentive',name:'样式2'}],
-      conditions:[{type:''}],
+      conditions:[{type:'',name:''}],
       baseconditions:[{type:''}],
       spconditions:[{type:''}],
       joinconditions:[{type:''}],
@@ -898,7 +901,10 @@ export default defineComponent({
       baseOptions:[{ label: "邀请1人奖励", value: "1" }],
       spOptions:[{ label: "指定日期", value: "1" },{ label: "达成单量", value: "2" }],
       joinOptions:[{ label: "活跃天数", value: "1" },{ label: "未活跃时间", value: "2" },{ label: "未活跃月份", value: "3" },{ label: "新人是否参与", value: "4" }],
-      zhSucOptions:[{ label: "出勤天数", value: "1" },{ label: "指定时间出勤", value: "2" },{ label: "日妥投单量", value: "3" }]
+      zhSucOptions:[{ label: "出勤天数", value: "1" },{ label: "指定时间出勤", value: "2" },{ label: "日妥投单量", value: "3" }],
+      spAwardOptions:[{ label: "邀请1人奖励", value: "1" }],
+      spAwardConditions:[],
+      spAwardId:null
     })
 
     onMounted(() => {
@@ -909,7 +915,7 @@ export default defineComponent({
         ElMessage.warning("所有达成条件都已添加，不能再添加了")
         return
       }
-      pdata.conditions.push({ type: "" })
+      pdata.conditions.push({ type: "",name:'' })
     }
     const removeCondition = (index) => {
       pdata.conditions.splice(index, 1)
@@ -925,7 +931,7 @@ export default defineComponent({
         ElMessage.warning("所有基础奖励都已添加，不能再添加了")
         return
       }
-      pdata.conditions.push({ type: "" })
+      pdata.baseconditions.push({ type: "" })
     }
     const removeBaseCondition = (index) => {
       pdata.baseconditions.splice(index, 1)
@@ -983,6 +989,13 @@ export default defineComponent({
       return pdata.zhsucconditions.some(
           (item, idx) => idx !== currentIndex && item.type === value
       )
+    }
+    const spawardChange = (v) => {
+      const sitem = pdata.spAwardOptions.find(opt => opt.id === v);
+      if(!pdata.spAwardConditions.find(opt => opt.id === v)){
+        pdata.spAwardConditions.push(sitem);
+      }
+
     }
     const searchEvent = () => {
       searchForm.currentPage = 0;
@@ -1044,10 +1057,46 @@ export default defineComponent({
       const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
       pdata.tempObj.id=randomNumber;
       pdata.tempObj.time=formtTime(new Date());
-      ary.push(pdata.tempObj)
-      localStorage.setItem('tempObj',JSON.stringify(ary));
+      let conditionsAry=[];
+      if(pdata.conditions.length>0){
+        conditionsAry.push({id:1,title:'达成条件',rules: getCondAry(pdata.conditions,pdata.sucOptions)});
+      }
+      if(pdata.baseconditions.length>0){
+        conditionsAry.push({id:2,title:'基础奖励',rules: getCondAry(pdata.baseconditions,pdata.baseOptions)});
+      }
+      if(pdata.spconditions.length>0){
+        conditionsAry.push({id:3,title:'额外达成条件',rules: getCondAry(pdata.spconditions,pdata.spOptions)});
+      }
+      if(pdata.spAwardConditions.length>0){
+        conditionsAry.push({id:4,title:'额外奖励',rules:pdata.spAwardConditions});
+      }
+      pdata.tempObj.rules=conditionsAry;
+      ary.push(pdata.tempObj);
+      let loc=localStorage.getItem('tempObj');
+      if(loc){
+        let lary=JSON.parse(loc).concat(ary);
+        localStorage.setItem('tempObj',JSON.stringify( lary ));
+      }
+      else{
+        localStorage.setItem('tempObj',JSON.stringify( ary));
+      }
       pdata.showAddTemp=false;
+
       getListData();
+    }
+    const getCondAry = (cAry,opsAry) => {
+      let condAry=[];
+      for(let o of cAry){
+        if(condAry.length==cAry.length){
+          break;
+        }
+        for(let c of opsAry){
+          if(o.id==c.id){
+            condAry.push(c);
+          }
+        }
+      }
+      return condAry;
     }
 
     const currentTheme = ref('recruit');
@@ -1122,7 +1171,7 @@ export default defineComponent({
     return{addSpCondition,removeSpCondition,isSpOptionDisabled,
       addBaseCondition,removeBaseCondition,isBaseOptionDisabled,
       isOptionDisabled,addCondition,removeCondition,activityData,
-      changeActType,changeTheme,saveTemp,editTemp,delTemp,
+      changeActType,changeTheme,saveTemp,editTemp,delTemp,spawardChange,
       searchEvent,getListData,addTemp,currentTheme,changeProv,
       addJoinCondition,removeJoinCondition,isJoinOptionDisabled,
       addZhSucCondition,removeZhSucCondition,isZhSucOptionDisabled,
