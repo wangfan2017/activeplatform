@@ -90,7 +90,7 @@
     <el-dialog
         v-model="showAddActive"
         title="添加活动"
-        width="50%"
+        width="70%"
         align-center>
       <div class="detailcontent">
         <div class="d-formview">
@@ -319,10 +319,10 @@
   overflow: auto;
 }
 :deep(.el-input) {
-  width: 350px;
+  width: 280px;
 }
 :deep(.el-textarea) {
-  width: 350px;
+  width: 280px;
 }
 .ruleform :deep(.el-input) {
   width: 100px;

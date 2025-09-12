@@ -61,7 +61,13 @@ export const publicRoutes = [
 				path: "/actenroll",
 				name: "actenroll",
 				component: () => import("@/views/active/enrolllst"),
-				meta: { title: "报名列表", icon: "pageDown"  },
+				meta: { title: "报名列表", icon: "pageDown" ,hidden:true },
+			},
+			{
+				path: "/job",
+				name: "job",
+				component: () => import("@/views/active/job"),
+				meta: { title: "岗位管理", icon: "pageDown"  },
 			},
 		]
 	},
@@ -92,6 +98,12 @@ export const publicRoutes = [
 				name: "permission",
 				component: () => import("@/views/system/permission"),
 				meta: { title: "权限管理", icon: "pageDown"  },
+			},
+			{
+				path: "/rule",
+				name: "rule",
+				component: () => import("@/views/system/rule"),
+				meta: { title: "规则管理", icon: "pageDown"  },
 			},
 		]
 	}

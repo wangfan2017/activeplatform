@@ -20,4 +20,10 @@ export function getPermission(params) {
         data: params
     });
 }
-
+export function getRuleList(params) {
+    return axios({
+        url: `/api/user/getRuleList`,
+        method: "post",
+        data: params
+    });
+}

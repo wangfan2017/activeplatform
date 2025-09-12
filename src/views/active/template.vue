@@ -88,7 +88,7 @@
     <el-dialog
         v-model="showAddTemp"
         title="添加模版"
-        width="50%"
+        width="70%"
         align-center>
       <div class="detailcontent">
         <div class="d-formview">
@@ -484,10 +484,10 @@
   overflow: auto;
 }
 :deep(.el-input) {
-  width: 310px;
+  width: 250px;
 }
 :deep(.el-textarea) {
-  width: 310px;
+  width: 250px;
 }
 
 //预览样式

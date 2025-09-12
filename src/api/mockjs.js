@@ -98,6 +98,11 @@ Mock.mock(/\/user\/getPermission/, 'post', () => {
                     label: '模版管理',
                     children: [],
                 },
+                {
+                    id: 13,
+                    label: '岗位管理',
+                    children: [],
+                },
             ],
         },
         {
@@ -119,6 +124,85 @@ Mock.mock(/\/user\/getPermission/, 'post', () => {
             ],
         },
     ];
+
+    return {
+        code: 200,
+        msg: 'success',
+        data: {
+            resCode: 1,
+            data: { list }
+        }
+    };
+});
+Mock.mock(/\/user\/getRules/, 'post', () => {
+    const list =[
+        {
+            id: 1,
+            label: '拉新活动',
+            children: [
+                {
+                    id: 11,
+                    label: '邀请内有效天数',
+                    cname:'达成条件',
+                },
+                {
+                    id: 12,
+                    label: '单量达成最大天数',
+                    cname:'达成条件',
+                },
+                {
+                    id: 13,
+                    label: '达成总单量',
+                    cname:'达成条件',
+                },
+                {
+                    id: 14,
+                    label: '达成有效天单量',
+                    cname:'达成条件',
+                },
+            ],
+        },
+        {
+            id: 2,
+            label: '系统管理',
+            children: [
+                {
+                    id: 21,
+                    label: '用户管理',
+                },
+                {
+                    id: 22,
+                    label: '角色管理',
+                },
+                {
+                    id: 23,
+                    label: '权限管理',
+                },
+            ],
+        },
+    ];
+
+    return {
+        code: 200,
+        msg: 'success',
+        data: {
+            resCode: 1,
+            data: { list }
+        }
+    };
+});
+Mock.mock(/\/user\/getRuleList/, 'post', () => {
+    const list =
+    [
+        { id: 1, name: '邀请内有效天数', controlType: 'number', ruleType: '达成条件', activityType: '拉新人',ruleDes:'被邀请人在规定天数内完成的单量' },
+        { id: 2, name: '单量达成最大天数', controlType: 'number', ruleType: '达成条件', activityType: '拉新人' },
+        { id: 3, name: '达成总单量', controlType: 'number', ruleType: '达成条件', activityType: '拉新人' },
+        { id: 4, name: '达成有效天单量', controlType: 'number', ruleType: '达成条件', activityType: '拉新人' },
+        { id: 5, name: '邀请1人奖励', controlType: 'number', ruleType: '基础奖励', activityType: '拉新人' },
+        { id: 6, name: '达成单量', controlType: 'number', ruleType: '额外达成', activityType: '拉新人' },
+        { id: 7, name: '指定日期', controlType: 'time', timeMode: 'point', ruleType: '额外达成', activityType: '拉新人' },
+        { id: 5, name: '邀请1人奖励', controlType: 'number', ruleType: '额外奖励', activityType: '拉新人' },
+    ]
 
     return {
         code: 200,
